@@ -12,10 +12,13 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
+import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
 
 export const Dashboard: React.FC = () => {
   const { products } = useProducts();
-  const { logs } = useInventoryLogs(5);
+  const { logs: recentLogs } = useInventoryLogs(5);
+  const { logs: allLogs } = useInventoryLogs(100); // More logs for the chart
   const { orders } = usePurchaseOrders();
 
   const totalProducts = products.length;
@@ -98,18 +101,23 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <StockMovementChart logs={allLogs} />
+        <CategoryDistribution products={products} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {logs.length === 0 ? (
+              {recentLogs.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No recent activity found.
                 </p>
               ) : (
-                logs.map((log) => (
+                recentLogs.map((log) => (
                   <div key={log.id} className="flex items-center gap-4">
                     <div
                       className={cn(
