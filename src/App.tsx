@@ -5,6 +5,8 @@ import { InventoryPage } from "./pages/Inventory";
 import { CategoriesPage } from "./pages/Categories";
 import { Dashboard } from "./pages/Dashboard";
 import { AuditLogPage } from "./pages/AuditLog";
+import { SuppliersPage } from "./pages/Suppliers";
+import { OrdersPage } from "./pages/Orders";
 
 function App() {
   const { loading } = useAuth();
@@ -24,11 +26,9 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/audit-log" element={<AuditLogPage />} />
-          <Route
-            path="/orders"
-            element={<div>Purchase Orders Page (Coming Soon)</div>}
-          />
+          <Route path="/orders" element={<OrdersPage />} />
           <Route
             path="/settings"
             element={<div>Settings Page (Coming Soon)</div>}

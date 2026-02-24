@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   History,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Box, label: "Inventory", href: "/inventory" },
   { icon: Tags, label: "Categories", href: "/categories" },
+  { icon: Truck, label: "Suppliers", href: "/suppliers" },
   { icon: ShoppingCart, label: "Purchase Orders", href: "/orders" },
   { icon: History, label: "Audit Log", href: "/audit-log" },
   { icon: Settings, label: "Settings", href: "/settings" },

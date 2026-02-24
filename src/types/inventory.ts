@@ -20,3 +20,37 @@ export interface Category {
   name: string;
   parentId: string | null;
 }
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  createdAt: any;
+}
+
+export type OrderStatus = "Pending" | "Received" | "Cancelled";
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  sku: string;
+  quantity: number;
+  costPrice: number;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  orderNumber: string;
+  supplierId: string;
+  supplierName: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: OrderStatus;
+  notes?: string;
+  createdAt: any;
+  updatedAt: any;
+  receivedAt?: any;
+}

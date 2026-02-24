@@ -1,17 +1,26 @@
 import React from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useInventoryLogs } from "@/hooks/useInventoryLogs";
+import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Box, AlertTriangle, TrendingUp, History } from "lucide-react";
+import {
+  Box,
+  AlertTriangle,
+  TrendingUp,
+  History,
+  ShoppingCart,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export const Dashboard: React.FC = () => {
   const { products } = useProducts();
   const { logs } = useInventoryLogs(5);
+  const { orders } = usePurchaseOrders();
 
   const totalProducts = products.length;
   const lowStockItems = products.filter((p) => p.quantity < 10);
+  const pendingOrders = orders.filter((o) => o.status === "Pending");
   const totalValue = products.reduce(
     (acc, p) => acc + p.sellingPrice * p.quantity,
     0,
@@ -68,6 +77,21 @@ export const Dashboard: React.FC = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               Retail value of stock
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Pending Orders
+            </CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pendingOrders.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Orders awaiting receipt
             </p>
           </CardContent>
         </Card>
