@@ -3,6 +3,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { useAuth } from "./context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InventoryPage } from "./pages/Inventory";
+import { CategoriesPage } from "./pages/Categories";
 
 const Dashboard = () => {
   return (
@@ -54,10 +55,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/inventory" element={<InventoryPage />} />
-          <Route
-            path="/categories"
-            element={<div>Categories Page (Coming Soon)</div>}
-          />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route
             path="/orders"
             element={<div>Purchase Orders Page (Coming Soon)</div>}
