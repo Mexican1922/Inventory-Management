@@ -20,10 +20,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { AddProductForm } from "@/components/inventory/AddProductForm";
 
 export const InventoryPage: React.FC = () => {
   const { products, loading } = useProducts();
   const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
 
   const filteredProducts = products.filter(
     (p) =>
@@ -40,22 +42,19 @@ export const InventoryPage: React.FC = () => {
             Manage your products and stock levels.
           </p>
         </div>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Add New Product</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              {/* Add Product Form would go here */}
-              <p className="text-sm text-muted-foreground">
-                Form implementation in progress...
-              </p>
+            <div className="py-4">
+              <AddProductForm onSuccess={() => setOpen(false)} />
             </div>
           </DialogContent>
         </Dialog>
