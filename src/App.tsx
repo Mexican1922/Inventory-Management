@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AppLayout } from "./components/layout/AppLayout";
+import { useAuth } from "./context/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const Dashboard = () => {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1,284</div>
+            <p className="text-xs text-muted-foreground">+4 from last week</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Low Stock Items
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">12</div>
+            <p className="text-xs text-muted-foreground">Requires attention</p>
+          </CardContent>
+        </Card>
+        {/* More cards... */}
+      </div>
+    </div>
+  );
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/inventory"
+            element={<div>Inventory Page (Coming Soon)</div>}
+          />
+          <Route
+            path="/categories"
+            element={<div>Categories Page (Coming Soon)</div>}
+          />
+          <Route
+            path="/orders"
+            element={<div>Purchase Orders Page (Coming Soon)</div>}
+          />
+          <Route
+            path="/settings"
+            element={<div>Settings Page (Coming Soon)</div>}
+          />
+        </Routes>
+      </AppLayout>
+    </Router>
+  );
 }
 
-export default App
+export default App;
