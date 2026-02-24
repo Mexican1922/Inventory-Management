@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,18 +20,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { AddProductForm } from "@/components/inventory/AddProductForm";
+import { StockAdjustmentDialog } from "@/components/inventory/StockAdjustmentDialog";
 
 export const InventoryPage: React.FC = () => {
   const { products, loading } = useProducts();
+  const { categories } = useCategories();
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [open, setOpen] = useState(false);
 
   const filteredProducts = products.filter(
     (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()),
+      (p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.sku.toLowerCase().includes(search.toLowerCase())) &&
+      (categoryFilter === "all" || p.categoryId === categoryFilter),
   );
 
   return (
@@ -62,7 +74,7 @@ export const InventoryPage: React.FC = () => {
 
       <Card>
         <CardContent className="p-0">
-          <div className="flex items-center gap-4 p-4 border-b">
+          <div className="flex items-center flex-1 gap-4 p-4 border-b">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -72,9 +84,19 @@ export const InventoryPage: React.FC = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
-            </Button>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Table>
@@ -123,7 +145,8 @@ export const InventoryPage: React.FC = () => {
                     <TableCell className="text-right">
                       ${product.sellingPrice.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                      <StockAdjustmentDialog product={product} />
                       <Button variant="ghost" size="sm">
                         Edit
                       </Button>
