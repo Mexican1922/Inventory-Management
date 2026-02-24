@@ -58,6 +58,10 @@ export const CreateOrderDialog: React.FC<CreateOrderDialogProps> = ({
         item.productName = product.name;
         item.sku = product.sku;
         item.costPrice = product.costPrice;
+        item.imageUrl =
+          product.imageUrls && product.imageUrls.length > 0
+            ? product.imageUrls[0]
+            : undefined;
       }
     } else {
       (item as any)[field] = value;

@@ -39,6 +39,7 @@ export interface OrderItem {
   sku: string;
   quantity: number;
   costPrice: number;
+  imageUrl?: string;
 }
 
 export interface PurchaseOrder {

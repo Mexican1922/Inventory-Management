@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "./ImageUpload";
 
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -41,6 +42,7 @@ const productSchema = z.object({
     .min(1, "Required")
     .regex(/^\d+$/, "Must be a whole number"),
   description: z.string().optional(),
+  imageUrls: z.array(z.string()),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -63,6 +65,7 @@ export const AddProductForm: React.FC<AddProductFormProps> = ({
       sellingPrice: "0",
       quantity: "0",
       description: "",
+      imageUrls: [],
     },
   });
 
@@ -78,6 +81,7 @@ export const AddProductForm: React.FC<AddProductFormProps> = ({
         sellingPrice: parseFloat(values.sellingPrice),
         quantity: parseInt(values.quantity, 10),
         categoryName: category?.name || "Uncategorized",
+        imageUrls: values.imageUrls,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -91,6 +95,19 @@ export const AddProductForm: React.FC<AddProductFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="imageUrls"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Product Images</FormLabel>
+              <FormControl>
+                <ImageUpload urls={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="name"

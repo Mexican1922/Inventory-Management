@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Box } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -127,7 +127,24 @@ export const InventoryPage: React.FC = () => {
                 filteredProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">
-                      {product.name}
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md border bg-muted overflow-hidden flex-shrink-0">
+                          {product.imageUrls && product.imageUrls.length > 0 ? (
+                            <img
+                              src={product.imageUrls[0]}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Box className="h-5 w-5 text-muted-foreground/50" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="truncate max-w-[200px]">
+                          {product.name}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>{product.sku}</TableCell>
                     <TableCell>
