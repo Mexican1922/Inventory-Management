@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { useAuth } from "./context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InventoryPage } from "./pages/Inventory";
 
 const Dashboard = () => {
   return (
@@ -52,10 +53,7 @@ function App() {
       <AppLayout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route
-            path="/inventory"
-            element={<div>Inventory Page (Coming Soon)</div>}
-          />
+          <Route path="/inventory" element={<InventoryPage />} />
           <Route
             path="/categories"
             element={<div>Categories Page (Coming Soon)</div>}
