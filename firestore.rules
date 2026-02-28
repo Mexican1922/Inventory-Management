@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+    
+    function isManagerOrAdmin() {
+      return hasRole('Manager') || hasRole('Admin');
+    }
+    
+    function isAdmin() {
+      return hasRole('Admin');
+    }
+
+    // Products
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      // Allow everyone to update quantity (for sales), but only Managers/Admins for other fields
+      allow update: if isAuthenticated() && (
+        isManagerOrAdmin() || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantity', 'variants', 'updatedAt']))
+      );
+      allow create, delete: if isManagerOrAdmin();
+    }
+    
+    // Categories
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isManagerOrAdmin();
+    }
+    
+    // Suppliers
+    match /suppliers/{supplierId} {
+      allow read: if isManagerOrAdmin(); 
+      allow write: if isManagerOrAdmin();
+    }
+    
+    // Purchase Orders
+    match /purchase_orders/{orderId} {
+      allow read: if isManagerOrAdmin(); 
+      allow write: if isManagerOrAdmin();
+    }
+    
+    // Inventory Logs
+    match /inventory_logs/{logId} {
+      allow read: if isAdmin(); 
+      allow create: if isAuthenticated(); // Allow staff to create logs for sales
+      allow update, delete: if false; 
+    }
+    
+    // User Profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin(); 
+    }
+  }
+}

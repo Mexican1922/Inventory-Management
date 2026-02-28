@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -16,70 +16,76 @@ interface Props {
 
 const COLORS = [
   "hsl(var(--primary))",
-  "hsl(var(--chart-1, 221.2 83.2% 53.3%))",
-  "hsl(var(--chart-2, 142.1 76.2% 36.3%))",
-  "hsl(var(--chart-3, 47.9 95.8% 53.1%))",
-  "hsl(var(--chart-4, 21.6 92.3% 44.7%))",
-  "hsl(var(--chart-5, 262.1 83.3% 57.8%))",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#06b6d4",
 ];
 
 export const CategoryDistribution: React.FC<Props> = ({ products }) => {
+  // Only render the chart after the DOM has laid out — prevents Recharts' -1 size warning
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const data = useMemo(() => {
     const categoryMap: Record<string, number> = {};
-
     products.forEach((product) => {
       const name = product.categoryName || "Uncategorized";
       categoryMap[name] = (categoryMap[name] || 0) + product.quantity;
     });
-
     return Object.entries(categoryMap)
-      .map(([name, value]) => ({
-        name,
-        value,
-      }))
+      .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [products]);
 
   if (products.length === 0) return null;
 
   return (
-    <Card className="col-span-3">
+    <Card className="col-span-full lg:col-span-3">
       <CardHeader>
         <CardTitle className="text-base font-semibold">
           Stock by Category
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {data.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--background))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Legend verticalAlign="bottom" height={36} />
-            </PieChart>
-          </ResponsiveContainer>
+        <div style={{ width: "100%", height: 300 }}>
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {data.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--background))",
+                    borderColor: "hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full animate-pulse rounded-lg bg-muted/50" />
+          )}
         </div>
       </CardContent>
     </Card>

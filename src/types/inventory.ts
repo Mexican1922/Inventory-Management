@@ -1,3 +1,16 @@
+export interface Variant {
+  id: string;
+  sku: string;
+  attributes: Record<string, string>; // e.g. { Size: "L", Color: "Red" }
+  quantity: number;
+  sellingPrice: number;
+}
+
+export interface Attribute {
+  name: string;
+  values: string[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -11,7 +24,11 @@ export interface Product {
   quantity: number;
   supplierInfo?: string;
   imageUrls?: string[];
-  createdAt: any;
+  isVariable?: boolean;
+  variants?: Variant[];
+  options?: Attribute[];
+  lowStockThreshold: number;
+  createdAt: any; // Firebase serverTimestamp()
   updatedAt: any;
 }
 

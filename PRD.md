@@ -20,6 +20,7 @@ A clean, minimal inventory management system for small to medium teams to track 
 - **Permissions**:
   - **Admin**: Full access to everything.
   - **Manager**: View/Edit/Add products & stock. Cannot delete products or manage users.
+  - **Sales Staff**: Access to "Quick Sales" mode to record transactions. Read-only access to products.
   - **Viewer**: Read-only access to dashboard and product list.
 
 ### 3.2 Product Management
@@ -45,6 +46,12 @@ A clean, minimal inventory management system for small to medium teams to track 
 - **Visuals**: Clean charts (using Recharts or similar).
 - **Metrics**: Total stock value, Top-selling/highest-volume products, Low-stock item count, Recent activity log.
 
+### 3.6 Enterprise Polish
+
+- **Quick Sales (POS)**: High-speed interface for recording sales by scanning or selecting items.
+- **Reporting**: Export inventory and sales logs to CSV/Excel.
+- **Scanning**: Built-in camera barcode scanner for mobile/tablet usage.
+
 ## 4. Architecture & Data Schema
 
 ### Firestore Collections
@@ -61,10 +68,6 @@ A clean, minimal inventory management system for small to medium teams to track 
 - **Components**: shadcn/ui for consistent data tables, modals, and forms.
 - **Navigation**: Sidebar for main sections (Dashboard, Inventory, Categories, Orders, Settings).
 
-## 6. Phase 1 Implementation Goals
-
-1. Setup React/Vite/Firebase project.
-2. Implement Auth with Role guards.
-3. Build Product & Category management.
-4. Add Stock Adjustment & Inventory logging.
-5. Create Dashboard with basic metrics.
+6. Implement Product Variants & Matrix Generator.
+7. Build "Sales Mode" (POS) with Barcode Scanning.
+8. Add CSV Export & Enterprise Reporting.

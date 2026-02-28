@@ -22,7 +22,9 @@ export const Dashboard: React.FC = () => {
   const { orders } = usePurchaseOrders();
 
   const totalProducts = products.length;
-  const lowStockItems = products.filter((p) => p.quantity < 10);
+  const lowStockItems = products.filter(
+    (p) => p.quantity <= (p.lowStockThreshold ?? 5),
+  );
   const pendingOrders = orders.filter((o) => o.status === "Pending");
   const totalValue = products.reduce(
     (acc, p) => acc + p.sellingPrice * p.quantity,
@@ -100,13 +102,13 @@ export const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
         <StockMovementChart logs={allLogs} />
         <CategoryDistribution products={products} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+        <Card className="col-span-full lg:col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
@@ -121,27 +123,69 @@ export const Dashboard: React.FC = () => {
                   <div key={log.id} className="flex items-center gap-4">
                     <div
                       className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full bg-muted",
+                        "flex h-9 w-9 items-center justify-center rounded-full bg-muted shrink-0",
                         log.change > 0 ? "text-green-600" : "text-red-600",
                       )}
                     >
                       <History className="h-4 w-4" />
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <p className="text-sm font-medium leading-none truncate">
                         {log.productName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {log.reason} by {log.userEmail}
                       </p>
                     </div>
-                    <div className="text-sm font-medium">
+                    <div className="text-sm font-medium shrink-0">
                       <Badge
                         variant={log.change > 0 ? "secondary" : "destructive"}
                       >
                         {log.change > 0 ? "+" : ""}
                         {log.change}
                       </Badge>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-full lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Low Stock Items
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 max-h-[300px] overflow-auto pr-2">
+              {lowStockItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  All items are well-stocked.
+                </p>
+              ) : (
+                lowStockItems.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                  >
+                    <div className="space-y-1 min-w-0 pr-2">
+                      <p className="text-sm font-medium leading-none truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        SKU: {product.sku}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <Badge variant="destructive">
+                        {product.quantity} left
+                      </Badge>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Min: {product.lowStockThreshold ?? 5}
+                      </p>
                     </div>
                   </div>
                 ))

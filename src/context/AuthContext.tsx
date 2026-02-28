@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getCountFromServer,
+  serverTimestamp,
+} from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 type Role = "Admin" | "Manager" | "Viewer";
@@ -29,17 +36,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Fetch user role from Firestore
         try {
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+
           if (userDoc.exists()) {
-            setRole(userDoc.data().role as Role);
+            // Document found — use the stored role
+            const data = userDoc.data();
+            console.log("[Auth] Role loaded:", data.role);
+            setRole(data.role as Role);
           } else {
-            // Default role if not found (maybe first user is Admin, others Viewer?)
-            setRole("Viewer");
+            // No document found — auto-create one.
+            // The FIRST user ever to sign in becomes Admin.
+            // Everyone after that defaults to Viewer (admin can promote them later).
+            const usersSnap = await getCountFromServer(collection(db, "users"));
+            const isFirstUser = usersSnap.data().count === 0;
+            const assignedRole: Role = isFirstUser ? "Admin" : "Viewer";
+
+            console.log(
+              `[Auth] No user document found. ${
+                isFirstUser
+                  ? "First user — assigning Admin."
+                  : "Assigning Viewer."
+              }`,
+            );
+
+            await setDoc(userDocRef, {
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName ?? "",
+              role: assignedRole,
+              createdAt: serverTimestamp(),
+            });
+
+            setRole(assignedRole);
           }
         } catch (error) {
-          console.error("Error fetching user role:", error);
+          console.error("[Auth] Error during role setup:", error);
           setRole("Viewer");
         }
       } else {

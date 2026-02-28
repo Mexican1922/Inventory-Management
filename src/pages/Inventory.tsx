@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
 import {
@@ -12,14 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Box } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Plus, Search, Box, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/exportUtils";
 import {
   Select,
   SelectContent,
@@ -28,15 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { AddProductForm } from "@/components/inventory/AddProductForm";
 import { StockAdjustmentDialog } from "@/components/inventory/StockAdjustmentDialog";
+import { RoleGate } from "@/components/auth/RoleGate";
 
 export const InventoryPage: React.FC = () => {
+  const navigate = useNavigate();
   const { products, loading } = useProducts();
   const { categories } = useCategories();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [open, setOpen] = useState(false);
 
   const filteredProducts = products.filter(
     (p) =>
@@ -54,22 +49,27 @@ export const InventoryPage: React.FC = () => {
             Manage your products and stock levels.
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() =>
+              exportToCSV(filteredProducts, "inventory-report.csv")
+            }
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+          <RoleGate minRole="Manager">
+            <Button
+              className="gap-2"
+              onClick={() => navigate("/inventory/add")}
+            >
               <Plus className="h-4 w-4" />
               Add Product
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <AddProductForm onSuccess={() => setOpen(false)} />
-            </div>
-          </DialogContent>
-        </Dialog>
+          </RoleGate>
+        </div>
       </div>
 
       <Card>
@@ -107,7 +107,9 @@ export const InventoryPage: React.FC = () => {
                 <TableHead>Category</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <RoleGate minRole="Manager">
+                  <TableHead className="text-right">Actions</TableHead>
+                </RoleGate>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -153,7 +155,9 @@ export const InventoryPage: React.FC = () => {
                     <TableCell>
                       <Badge
                         variant={
-                          product.quantity < 10 ? "destructive" : "secondary"
+                          product.quantity <= (product.lowStockThreshold ?? 5)
+                            ? "destructive"
+                            : "secondary"
                         }
                       >
                         {product.quantity} units
@@ -162,12 +166,14 @@ export const InventoryPage: React.FC = () => {
                     <TableCell className="text-right">
                       ${product.sellingPrice.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <StockAdjustmentDialog product={product} />
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
-                    </TableCell>
+                    <RoleGate minRole="Manager">
+                      <TableCell className="text-right space-x-2">
+                        <StockAdjustmentDialog product={product} />
+                        <Button variant="ghost" size="sm">
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </RoleGate>
                   </TableRow>
                 ))
               )}

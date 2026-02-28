@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "./ImageUpload";
+import { Switch } from "@/components/ui/switch";
+import { VariantGenerator } from "./VariantGenerator";
+import type { Variant, Attribute } from "@/types/inventory";
 
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -43,6 +46,8 @@ const productSchema = z.object({
     .regex(/^\d+$/, "Must be a whole number"),
   description: z.string().optional(),
   imageUrls: z.array(z.string()),
+  isVariable: z.boolean(),
+  lowStockThreshold: z.string().regex(/^\d+$/, "Must be a whole number"),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -66,26 +71,44 @@ export const AddProductForm: React.FC<AddProductFormProps> = ({
       quantity: "0",
       description: "",
       imageUrls: [],
-    },
+      isVariable: false,
+      lowStockThreshold: "5",
+    } as ProductFormValues,
   });
+
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [options, setOptions] = useState<Attribute[]>([]);
+
+  const isVariable = form.watch("isVariable");
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
       const category = categories.find((c) => c.id === values.categoryId);
+
+      const totalQuantity = values.isVariable
+        ? variants.reduce((acc, v) => acc + v.quantity, 0)
+        : parseInt(values.quantity, 10);
+
       await addDoc(collection(db, "products"), {
         name: values.name,
         sku: values.sku,
         categoryId: values.categoryId,
-        description: values.description,
+        description: values.description || "",
         costPrice: parseFloat(values.costPrice),
         sellingPrice: parseFloat(values.sellingPrice),
-        quantity: parseInt(values.quantity, 10),
+        quantity: totalQuantity,
         categoryName: category?.name || "Uncategorized",
         imageUrls: values.imageUrls,
+        isVariable: values.isVariable,
+        variants: values.isVariable ? variants : [],
+        options: values.isVariable ? options : [],
+        lowStockThreshold: parseInt(values.lowStockThreshold, 10),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       form.reset();
+      setVariants([]);
+      setOptions([]);
       onSuccess();
     } catch (error) {
       console.error("Error adding product:", error);
@@ -163,47 +186,100 @@ export const AddProductForm: React.FC<AddProductFormProps> = ({
             )}
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="costPrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cost ($)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+
+        <FormField
+          control={form.control}
+          name="isVariable"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/50">
+              <div className="space-y-0.5">
+                <FormLabel>Product Variations</FormLabel>
+                <div className="text-[0.7rem] text-muted-foreground">
+                  Enable if this product has multiple sizes, colors, etc.
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {isVariable ? (
+          <VariantGenerator
+            baseSku={form.watch("sku")}
+            basePrice={parseFloat(form.watch("sellingPrice") || "0")}
+            onVariantsChange={(v, o) => {
+              setVariants(v);
+              setOptions(o);
+            }}
           />
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="costPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cost ($)</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sellingPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Selling ($)</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Initial Qty</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="sellingPrice"
+            name="lowStockThreshold"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Selling ($)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Initial Qty</FormLabel>
+                <FormLabel>Low Stock Alert Threshold</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
+                <div className="text-[0.7rem] text-muted-foreground">
+                  Get notified when stock drops below this.
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="description"

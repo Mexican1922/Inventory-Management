@@ -1,40 +1,79 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
-import { useAuth } from "./context/AuthContext";
 import { InventoryPage } from "./pages/Inventory";
+import { AddProductPage } from "./pages/AddProduct";
 import { CategoriesPage } from "./pages/Categories";
 import { Dashboard } from "./pages/Dashboard";
 import { AuditLogPage } from "./pages/AuditLog";
 import { SuppliersPage } from "./pages/Suppliers";
 import { OrdersPage } from "./pages/Orders";
+import { SalesMode } from "./pages/SalesMode";
+import { SettingsPage } from "./pages/Settings";
+import { ProfilePage } from "./pages/Profile";
+import { LoginPage } from "./pages/Login";
+import { RoleProtectedRoute } from "./components/auth/RoleProtectedRoute";
+import { AuthProtectedRoute } from "./components/auth/AuthProtectedRoute";
+import { Toaster } from "sonner";
 
 function App() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
   return (
     <Router>
-      <AppLayout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/suppliers" element={<SuppliersPage />} />
-          <Route path="/audit-log" element={<AuditLogPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route
-            path="/settings"
-            element={<div>Settings Page (Coming Soon)</div>}
-          />
-        </Routes>
-      </AppLayout>
+      <Toaster position="top-right" richColors />
+      <Routes>
+        {/* ── Public Routes ─────────────────────────────── */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* ── Auth-Protected Routes (all remaining paths) ─ */}
+        <Route
+          path="/*"
+          element={
+            <AuthProtectedRoute>
+              <AppLayout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/inventory" element={<InventoryPage />} />
+                  <Route
+                    path="/inventory/add"
+                    element={
+                      <RoleProtectedRoute requiredRole="Manager">
+                        <AddProductPage />
+                      </RoleProtectedRoute>
+                    }
+                  />
+                  <Route path="/categories" element={<CategoriesPage />} />
+                  <Route path="/sales" element={<SalesMode />} />
+                  <Route
+                    path="/suppliers"
+                    element={
+                      <RoleProtectedRoute requiredRole="Manager">
+                        <SuppliersPage />
+                      </RoleProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/audit-log"
+                    element={
+                      <RoleProtectedRoute requiredRole="Admin">
+                        <AuditLogPage />
+                      </RoleProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <RoleProtectedRoute requiredRole="Manager">
+                        <OrdersPage />
+                      </RoleProtectedRoute>
+                    }
+                  />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                </Routes>
+              </AppLayout>
+            </AuthProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 }
