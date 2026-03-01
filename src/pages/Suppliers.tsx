@@ -149,70 +149,131 @@ export const SuppliersPage: React.FC = () => {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Supplier Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+          {/* Desktop View */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    Loading suppliers...
-                  </TableCell>
+                  <TableHead>Supplier Name</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : suppliers.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No suppliers found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                suppliers.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.name}</TableCell>
-                    <TableCell className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      {s.contactName || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {s.email ? (
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{s.email}</span>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {s.phone ? (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{s.phone}</span>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      Loading suppliers...
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : suppliers.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      No suppliers found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  suppliers.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium">{s.name}</TableCell>
+                      <TableCell className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        {s.contactName || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {s.email ? (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{s.email}</span>
+                          </div>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {s.phone ? (
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{s.phone}</span>
+                          </div>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm">
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+            {loading ? (
+              <div className="h-24 flex items-center justify-center text-muted-foreground">
+                Loading suppliers...
+              </div>
+            ) : suppliers.length === 0 ? (
+              <div className="h-24 flex items-center justify-center text-muted-foreground">
+                No suppliers found.
+              </div>
+            ) : (
+              suppliers.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex flex-col gap-3 rounded-lg border p-4 bg-card text-card-foreground shadow-sm"
+                >
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <h4 className="font-semibold text-lg">{s.name}</h4>
+                    <Button variant="ghost" size="sm" className="h-8">
+                      Edit
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span>{s.contactName || "No contact name"}</span>
+                    </div>
+
+                    {s.email && (
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <a
+                          href={`mailto:${s.email}`}
+                          className="text-primary hover:underline"
+                        >
+                          {s.email}
+                        </a>
+                      </div>
+                    )}
+
+                    {s.phone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <a
+                          href={`tel:${s.phone}`}
+                          className="text-primary hover:underline"
+                        >
+                          {s.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
